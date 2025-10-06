@@ -22,6 +22,7 @@ import AddRoomPage from "./pages/AddRoomPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup"; 
 import AccommodationMap from "./pages/AccommodationMap";
+import RoommateProfilePage from "./pages/RoommateProfilePage";
 
 const App = () => {
   return (
@@ -64,6 +65,7 @@ const AppContent = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/add-rooms" element={<AddRoomPage />} />
         <Route path="/map"  element={<AccommodationMap />}/>
+        <Route path="/roommate-profile" element={<RoommateProfilePage />} />
       </Routes>
     </div>
   );

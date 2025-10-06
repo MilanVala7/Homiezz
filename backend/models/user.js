@@ -23,6 +23,38 @@ const UserSchema = new mongoose.Schema(
     listedRooms: [{ type: mongoose.Schema.Types.ObjectId, ref: "Room" }],
     rentedRooms: [{ type: mongoose.Schema.Types.ObjectId, ref: "Room"}],
     role: { type: String, enum: ["tenant", "owner"], default: "tenant" },
+    roommateProfile: {
+      isActive: { type: Boolean, default: false },
+      bio: String,
+      age: Number,
+      gender: { type: String, enum: ["Male", "Female", "Other"] },
+      occupation: String,
+      occupationType: { 
+        type: String, 
+        enum: ["Student", "Working Professional", "Freelancer", "Other"] 
+      },
+      budget: Number,
+      moveInDate: Date,
+      locationPreference: String,
+      currentLocation: String,
+      lifestyle: {
+        smoking: { type: String, enum: ["Non-Smoker", "Social Smoker", "Smoker"] },
+        drinking: { type: String, enum: ["Non-Drinker", "Social Drinker", "Drinker"] },
+        pets: { type: String, enum: ["Pet Friendly", "No Pets"] },
+        diet: { type: String, enum: ["Vegetarian", "Non-Vegetarian", "Vegan", "No Preference"] },
+        sleepSchedule: { type: String, enum: ["Early Bird", "Night Owl", "Flexible"] }
+      },
+      interests: [String],
+      roommatePreferences: {
+        genderPreference: { type: String, enum: ["Male", "Female", "Any"] },
+        ageRange: {
+          min: Number,
+          max: Number
+        },
+        occupationPreference: [String]
+      },
+      updatedAt: { type: Date, default: Date.now }
+    },
   },
   { timestamps: true }
 );

@@ -7,6 +7,13 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import roomsRoutes from "./routes/roomsRoute.js";
 
+import roommateRoutes from './routes/roommates.js';
+import { 
+  updateRoommateProfile, 
+  getRoommateProfile, 
+  toggleRoommateProfile 
+} from './controllers/roommateController.js';
+import { authenticateToken } from "./middleware/authMiddleware.js";
 dotenv.config();
 
 const app = express();
@@ -24,7 +31,10 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomsRoutes);
-
+app.put('/api/user/roommate-profile', authenticateToken, updateRoommateProfile);
+app.get('/api/user/roommate-profile', authenticateToken, getRoommateProfile);
+app.patch('/api/user/roommate-profile/active', authenticateToken, toggleRoommateProfile);
+app.use('/api/roommates', roommateRoutes);
 app.get("/", (req, res) => {
   res.send("Welcome to the backend server");
 });

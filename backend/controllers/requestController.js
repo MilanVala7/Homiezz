@@ -5,8 +5,6 @@ import User from '../models/user.js';
 // @desc    Send room request
 // @route   POST /api/rooms/:roomId/request
 // @access  Private
-// In requestController.js, fix the sendRoomRequest function:
-
 const sendRoomRequest = async (req, res) => {
   try {
     const { roomId } = req.params;
@@ -93,6 +91,7 @@ const sendRoomRequest = async (req, res) => {
     });
   }
 };
+
 // @desc    Get user's sent requests
 // @route   GET /api/rooms/requests/sent
 // @access  Private
@@ -218,8 +217,20 @@ const acceptRequest = async (req, res) => {
 
     // Update room status and add roommate
     const room = await Room.findById(roomRequest.room._id);
-    room.isVacant = false;
+    
+    // Add requester to current roommates
     room.currentRoommates.push(roomRequest.requester._id);
+    
+    // Decrease available beds count
+    if (room.availableBeds > 0) {
+      room.availableBeds = room.availableBeds - 1;
+    }
+    
+    // Set isVacant to false only if no beds are available
+    if (room.availableBeds === 0) {
+      room.isVacant = false;
+    }
+    
     await room.save();
 
     // Update user's rentedRooms
@@ -309,10 +320,70 @@ const rejectRequest = async (req, res) => {
   }
 };
 
+// @desc    Cancel room request (for requester)
+// @route   POST /api/rooms/requests/:requestId/cancel
+// @access  Private
+const cancelRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const userId = req.user.userId;
+
+    const roomRequest = await RoomRequest.findById(requestId);
+
+    if (!roomRequest) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    // Check if user is the requester
+    if (roomRequest.requester.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to cancel this request'
+      });
+    }
+
+    // Check if request is still pending
+    if (roomRequest.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'Request has already been processed'
+      });
+    }
+
+    // Update request status
+    roomRequest.status = 'cancelled';
+    await roomRequest.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Request cancelled successfully',
+      data: roomRequest
+    });
+  } catch (error) {
+    console.error('Error cancelling request:', error);
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request ID'
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Server error while cancelling request'
+    });
+  }
+};
+
 export {
   sendRoomRequest,
   getSentRequests,
   getReceivedRequests,
   acceptRequest,
-  rejectRequest
+  rejectRequest,
+  cancelRequest
 };
